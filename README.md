@@ -6,7 +6,9 @@
 
 ### Em breve a parte do compatilhamento Samba será adicionado.
 
-
-# Creditos
+### Links 
+[Nextcloud-tutorial](https://github.com/xcad2k/videos/tree/main/nextcloud-tutorial)
+[NginxProxyManager](https://nginxproxymanager.com/)
+#### Creditos
 [JC21](https://github.com/jc21)
 [Christian Lempa](https://github.com/xcad2k)
