@@ -1,0 +1,138 @@
+# Docker compose Nextcloud + Mariadb
+version: '3'
+
+services:
+  db:
+    image : mariadb:10.5
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - TZ=America/Sao_Paulo
+      - MYSQL_ROOT_PASSWORD=/run/secrets/mysql_password_root.txt
+    env_file :
+      - db.env
+    networks:
+      - proxy-tier
+      - default
+
+  app:
+    image: matrixsoft1/nextcloud:v1
+    restart: always
+    links:
+      - db
+    volumes:
+      - nextcloud:/var/www/html
+      - /nextcloud/data:/var/www/html/data
+      - /nextcloud/config:/var/www/html/config
+      - /nextcloud/dados:/dados
+    environment:
+      - TZ=America/Sao_Paulo
+      - MYSQL_HOST=db
+      - NEXTCLOUD_ADMIN_PASSWORD_FILE=/run/secrets/nextcloud_admin_password
+      - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
+#      - VIRTUAL_HOST=/run/secrets/nextcloud_virtual_host
+#      - LETSENCRYPT_HOST=/run/secrets/nextcloud_lc_host
+#      - LETSENCRYPT_EMAIL=/run/secrets/nextcloud_lc_mail
+      - REDIS_HOST=redis
+    env_file :
+      - db.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - proxy-tier
+      - default
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:alpine
+    restart: always
+    environment:
+      - TZ=America/Sao_Paulo
+
+  cron:
+    image: nextcloud:apache
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    entrypoint: /cron.sh
+    environment:
+      - TZ=America/Sao_Paulo
+    depends_on:
+      - db
+      - redis
+
+  proxy:
+    build: ./proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "false"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./default.conf /etc/nginx/conf.d/default.conf
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - proxy-tier
+
+#  letsencrypt-companion:
+#    image: nginxproxy/acme-companion
+#    restart: always
+#    volumes:
+#      - certs:/etc/nginx/certs
+#      - acme:/etc/acme.sh
+#      - vhost.d:/etc/nginx/vhost.d
+#      - html:/usr/share/nginx/html
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#    networks:
+#      - proxy-tier
+#    depends_on:
+#      - proxy
+
+
+
+#autoassinado
+
+  omgwtfssl:
+    image: paulczar/omgwtfssl
+    restart: "no"
+    volumes:
+      - certs:/certs
+    environment:
+      - SSL_SUBJECT=servhostname.local
+      - CA_SUBJECT=my@example.com
+      - SSL_KEY=/certs/servhostname.local.key
+      - SSL_CSR=/certs/servhostname.local.csr
+      - SSL_CERT=/certs/servhostname.local.crt
+    networks:
+      - proxy-tier
+
+networks:
+  proxy-tier:
+
+volumes:
+  db:
+  nextcloud:
+  certs:
+  acme:
+  vhost.d:
+  html:
+
+secrets:
+  nextcloud_admin_password:
+    file: ./nextcloud_admin_password.txt # put admin password in this file
+  nextcloud_admin_user:
+    file: ./nextcloud_admin_user.txt # put admin username in this file
+  mysql_password_root:
+    file: ./mysql_password_root.txt # put mysql root password in this file

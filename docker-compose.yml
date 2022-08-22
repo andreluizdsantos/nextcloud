@@ -1,0 +1,113 @@
+# Docker compose Nextcloud + Mariadb + Proxy
+version: "3"
+
+volumes:
+  nextcloud-data:
+  nextcloud-db:
+  nextcloud:
+  nextcloud-dados:
+  nextcloud-config:
+  npm-data:
+  npm-ssl:
+  npm-db:
+
+networks:
+  frontend:
+    # add this if the network is already existing!
+    # external: true
+  backend:
+
+services:
+  nextcloud-db:
+    image: mariadb
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    volumes:
+      - nextcloud-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=/run/secrets/mysql_password_root.txt
+      - TZ=America/Sao_Paulo
+    env_file :
+      - db.env
+    networks:
+      - backend
+
+  nextcloud-app:
+    image: matrixsoft1/nextcloud:v1
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+      - nextcloud-data:/var/www/html/data
+      - nextcloud-config:/var/www/html/config
+      - nextcloud-dados:/dados
+    environment:
+      - MYSQL_HOST=nextcloud-db
+      - TZ=America/Sao_Paulo
+    env_file :
+      - db.env
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - nextcloud-db
+      - redis
+
+  redis:
+    image: redis:alpine
+    restart: always
+    environment:
+      - TZ=America/Sao_Paulo
+
+  cron:
+    image: nextcloud:apache
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    entrypoint: /cron.sh
+    environment:
+      - TZ=America/Sao_Paulo
+    depends_on:
+      - nextcloud-db
+      - redis
+
+  npm-app:
+    image: jc21/nginx-proxy-manager:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    environment:
+      - DB_MYSQL_HOST=npm-db
+      - DB_MYSQL_PORT=3306
+      - DB_MYSQL_USER=npm
+      - DB_MYSQL_PASSWORD=nginx_db_password
+      - DB_MYSQL_NAME=npm
+    volumes:
+      - npm-data:/data
+      - npm-ssl:/etc/letsencrypt
+    networks:
+      - frontend
+      - backend
+  # admin@example.com / changeme
+
+  npm-db:
+    image: jc21/mariadb-aria:latest
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=nginx_db_password_root
+      - MYSQL_DATABASE=npm
+      - MYSQL_USER=npm
+      - MYSQL_PASSWORD=nginx_db_password
+    volumes:
+      - npm-db:/var/lib/mysql
+    networks:
+      - backend
+
+secrets:
+  mysql_password_root:
+    file: ./mysql_password_root.txt # put mysql root password in this file
+  nginx_db_password_root:
+    file: ./nginx_db_password_root.txt # put nginx db root password in this file
+  nginx_db_password:
+    file: ./nginx_db_password.txt # put nginx db password in this file

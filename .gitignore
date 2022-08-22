@@ -1,0 +1,5 @@
+mysql_password.txt
+mysql_password_root.txt
+nginx_db_password_root.txt
+nginx_db_password.txt
+db.env
