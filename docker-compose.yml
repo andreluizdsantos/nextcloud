@@ -25,10 +25,10 @@ services:
     volumes:
       - nextcloud-db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=/run/secrets/mysql_password_root.txt
+      - MYSQL_ROOT_PASSWORD=/run/secrets/mysql_password_root
       - TZ=America/Sao_Paulo
     env_file :
-      - db.env
+      - db.env #  put mysql user, password and db name in this file
     networks:
       - backend
 
@@ -81,7 +81,7 @@ services:
       - DB_MYSQL_HOST=npm-db
       - DB_MYSQL_PORT=3306
       - DB_MYSQL_USER=npm
-      - DB_MYSQL_PASSWORD=nginx_db_password
+      - DB_MYSQL_PASSWORD=/run/secrets/nginx_db_password
       - DB_MYSQL_NAME=npm
     volumes:
       - npm-data:/data
@@ -95,10 +95,10 @@ services:
     image: jc21/mariadb-aria:latest
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=nginx_db_password_root
+      - MYSQL_ROOT_PASSWORD=/run/secrets/nginx_db_password_root
       - MYSQL_DATABASE=npm
       - MYSQL_USER=npm
-      - MYSQL_PASSWORD=nginx_db_password
+      - MYSQL_PASSWORD=/run/secrets/nginx_db_password
     volumes:
       - npm-db:/var/lib/mysql
     networks:
