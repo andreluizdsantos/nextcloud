@@ -39,7 +39,7 @@ services:
       - nextcloud:/var/www/html
       - nextcloud-data:/var/www/html/data
       - nextcloud-config:/var/www/html/config
-      - nextcloud-dados:/dados
+      - /nextcloud/dados:/dados
     environment:
       - MYSQL_HOST=nextcloud-db
       - TZ=America/Sao_Paulo
