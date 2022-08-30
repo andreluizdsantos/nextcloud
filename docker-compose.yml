@@ -62,18 +62,6 @@ services:
     volumes:
       - redis:/data
 
-  cron:
-    image: nextcloud:apache
-    restart: always
-    volumes:
-      - nextcloud:/var/www/html
-    entrypoint: /cron.sh
-    environment:
-      - TZ=America/Sao_Paulo
-    depends_on:
-      - nextcloud-db
-      - redis
-
   npm-app:
     image: jc21/nginx-proxy-manager:latest
     restart: always
