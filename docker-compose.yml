@@ -43,6 +43,8 @@ services:
     environment:
       - MYSQL_HOST=nextcloud-db
       - TZ=America/Sao_Paulo
+      - REDIS_HOST_PASSWORD=/run/secrets/redis_password
+      - REDIS_HOST=redis
     env_file :
       - db.env
     networks:
@@ -54,9 +56,10 @@ services:
 
   redis:
     image: redis:alpine
-    restart: always
+    restart: unless-stopped
     environment:
       - TZ=America/Sao_Paulo
+    command: redis-server --requirepass /run/secrets/redis_password
 
   cron:
     image: nextcloud:apache
@@ -111,3 +114,5 @@ secrets:
     file: ./nginx_db_password_root.txt # put nginx db root password in this file
   nginx_db_password:
     file: ./nginx_db_password.txt # put nginx db password in this file
+  redis_password:
+    file: ./redis_password.txt # put redis password in this file
