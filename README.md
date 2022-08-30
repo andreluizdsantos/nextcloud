@@ -1,4 +1,4 @@
-# IaC, Nextcloud + Mariadb + Proxy com Docker-Compose
+# Nextcloud + Mariadb + Proxy com Docker-Compose
 
 ### Este repositório foi criado devido a necessidade de montar uma imagem Docker do Nextcloud com uma pasta que possa ser montada e compartilhada com usuários criados no Nextcloud e que essa pasta possa ser compartilhada via Samba para usuários na rede local.
 
@@ -12,6 +12,6 @@ Em breve a parte do compatilhamento Samba será adicionado.
 [Nextcloud-tutorial](https://github.com/xcad2k/videos/tree/main/nextcloud-tutorial)
 
 [NginxProxyManager](https://nginxproxymanager.com/)
-#### Creditos
+#### Creditos 
 [JC21](https://github.com/jc21)
 [Christian Lempa](https://github.com/xcad2k)
