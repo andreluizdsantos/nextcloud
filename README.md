@@ -7,6 +7,7 @@ Exemplo: um cliente envia documentos através da conta Nextcloud, e os arquivos 
 Em breve a parte do compatilhamento Samba será adicionado.
 
 #### Links 
+[Meus tutorial de instalação manual do Nextcloud no Ubuntu 22.04](https://github.com/andreluizdsantos/nextcloud-manual)
 [Nextcloud-tutorial](https://github.com/xcad2k/videos/tree/main/nextcloud-tutorial)
 [NginxProxyManager](https://nginxproxymanager.com/)
 #### Creditos
