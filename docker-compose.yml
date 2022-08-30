@@ -1,12 +1,11 @@
 # Docker compose Nextcloud + Mariadb + Proxy
-version: "3"
+version: "3.3"
 
 volumes:
   nextcloud-data:
   nextcloud-db:
   nextcloud:
-  nextcloud-dados:
-  nextcloud-config:
+  redis:
   npm-data:
   npm-ssl:
   npm-db:
@@ -38,7 +37,7 @@ services:
     volumes:
       - nextcloud:/var/www/html
       - nextcloud-data:/var/www/html/data
-      - nextcloud-config:/var/www/html/config
+      - /nextcloud/config:/var/www/html/config
       - /nextcloud/dados:/dados
     environment:
       - MYSQL_HOST=nextcloud-db
@@ -60,6 +59,8 @@ services:
     environment:
       - TZ=America/Sao_Paulo
     command: redis-server --requirepass /run/secrets/redis_password
+    volumes:
+      - redis:/data
 
   cron:
     image: nextcloud:apache
